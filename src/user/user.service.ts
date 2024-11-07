@@ -1,26 +1,100 @@
-import { Injectable } from '@nestjs/common';
+import { v4 as uuid } from 'uuid';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { DatabaseService } from 'src/database/database.service';
+import { User } from './entities/user.entity';
+import { UUID } from 'src/database/database.types';
+
+export class PasswordException extends HttpException {
+  constructor(message) {
+    super(message, HttpStatus.BAD_REQUEST);
+  }
+}
 
 @Injectable()
 export class UserService {
+  constructor(private readonly databaseService: DatabaseService) {}
+  private readonly logger = new Logger();
+
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    const user = new User({
+      id: uuid(),
+      login: createUserDto.login,
+      password: createUserDto.password,
+      version: 1,
+      createdAt: new Date().valueOf(),
+      updatedAt: new Date().valueOf(),
+    });
+    this.databaseService.users.push(user);
+    const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   findAll() {
-    return `This action returns all user`;
+    return this.databaseService.users.map((user) => {
+      const { password: _password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: UUID) {
+    const user = this.databaseService.users.find((user) => user.id === id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: UUID, updateUserDto: UpdateUserDto) {
+    const userIndex = this.databaseService.users.findIndex(
+      (user) => user.id === id,
+    );
+    const user = this.databaseService.users[userIndex];
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (user.password !== updateUserDto.oldPassword) {
+      throw new ForbiddenException('Wrong old password');
+    }
+
+    if (updateUserDto.oldPassword === updateUserDto.newPassword) {
+      throw new BadRequestException('Passwords should not be the same');
+    }
+
+    const updatedUser: User = {
+      ...user,
+      version: user.version + 1,
+      updatedAt: new Date().valueOf(),
+      password: updateUserDto.newPassword,
+    };
+
+    this.databaseService.users.splice(userIndex, 1, updatedUser);
+    const { password: _password, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: UUID) {
+    const userIndex = this.databaseService.users.findIndex(
+      (user) => user.id === id,
+    );
+
+    if (userIndex === -1) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    this.databaseService.users.splice(userIndex, 1);
+    return;
   }
 }
