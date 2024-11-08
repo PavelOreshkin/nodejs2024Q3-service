@@ -10,7 +10,14 @@ import { DatabaseService } from './database/database.service';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [UserModule, ArtistModule, AlbumModule, TrackModule, FavoriteModule, DatabaseModule],
+  imports: [
+    UserModule,
+    ArtistModule,
+    AlbumModule,
+    TrackModule,
+    FavoriteModule,
+    DatabaseModule,
+  ],
   controllers: [AppController],
   providers: [AppService, DatabaseService],
 })

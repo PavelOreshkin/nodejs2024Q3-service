@@ -14,16 +14,16 @@ import { DatabaseService } from 'src/database/database.service';
 import { User } from './entities/user.entity';
 import { UUID } from 'src/database/database.types';
 
-export class PasswordException extends HttpException {
-  constructor(message) {
-    super(message, HttpStatus.BAD_REQUEST);
+export class UserNotFoundException extends HttpException {
+  constructor(id) {
+    super(`User with ID ${id} not found`, HttpStatus.NOT_FOUND);
   }
 }
 
 @Injectable()
 export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
-  private readonly logger = new Logger();
+  private readonly logger = new Logger(); // TODO удалить
 
   create(createUserDto: CreateUserDto) {
     const user = new User({
@@ -49,7 +49,7 @@ export class UserService {
   findOne(id: UUID) {
     const user = this.databaseService.users.find((user) => user.id === id);
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new UserNotFoundException(id);
     }
     const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -62,7 +62,7 @@ export class UserService {
     const user = this.databaseService.users[userIndex];
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new UserNotFoundException(id);
     }
 
     if (user.password !== updateUserDto.oldPassword) {
@@ -91,7 +91,7 @@ export class UserService {
     );
 
     if (userIndex === -1) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new UserNotFoundException(id);
     }
 
     this.databaseService.users.splice(userIndex, 1);
