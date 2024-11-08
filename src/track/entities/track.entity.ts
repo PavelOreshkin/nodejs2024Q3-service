@@ -1,8 +1,10 @@
+import { UUID } from 'src/database/database.types';
+
 export class Track {
-  id: string; // uuid v4
+  id: UUID; // uuid v4
   name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
+  artistId: UUID | null; // refers to Artist
+  albumId: UUID | null; // refers to Album
   duration: number; // integer number
 
   constructor({
@@ -12,10 +14,10 @@ export class Track {
     albumId,
     duration,
   }: {
-    id: string;
+    id: UUID;
     name: string;
-    artistId: string | null;
-    albumId: string | null;
+    artistId: UUID | null;
+    albumId: UUID | null;
     duration: number;
   }) {
     this.id = id;

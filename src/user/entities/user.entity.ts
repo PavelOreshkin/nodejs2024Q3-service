@@ -16,7 +16,7 @@ export class User {
     createdAt,
     updatedAt,
   }: {
-    id: string;
+    id: UUID;
     login: string;
     password: string;
     version: number;

@@ -1,5 +1,7 @@
+import { UUID } from 'src/database/database.types';
+
 export class Artist {
-  id: string; // uuid v4
+  id: UUID; // uuid v4
   name: string;
   grammy: boolean;
 
@@ -8,7 +10,7 @@ export class Artist {
     name,
     grammy,
   }: {
-    id: string;
+    id: UUID;
     name: string;
     grammy: boolean;
   }) {

@@ -1,4 +1,5 @@
 import { IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
+import { UUID } from 'src/database/database.types';
 
 export class CreateTrackDto {
   @IsString()
@@ -9,9 +10,9 @@ export class CreateTrackDto {
 
   @IsUUID()
   @IsOptional()
-  artistId: string | null;
+  artistId: UUID | null;
 
   @IsUUID()
   @IsOptional()
-  albumId: string | null;
+  albumId: UUID | null;
 }
