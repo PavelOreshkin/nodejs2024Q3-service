@@ -2,23 +2,15 @@ import { v4 as uuid } from 'uuid';
 import {
   BadRequestException,
   ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { User } from './entities/user.entity';
 import { UUID } from 'src/database/database.types';
-
-export class UserNotFoundException extends HttpException {
-  constructor(id) {
-    super(`User with ID ${id} not found`, HttpStatus.NOT_FOUND);
-  }
-}
+import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 
 @Injectable()
 export class UserService {
@@ -49,7 +41,7 @@ export class UserService {
   findOne(id: UUID) {
     const user = this.databaseService.users.find((user) => user.id === id);
     if (!user) {
-      throw new UserNotFoundException(id);
+      throw new EntityNotFoundException(Entity.USER, id);
     }
     const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -62,7 +54,7 @@ export class UserService {
     const user = this.databaseService.users[userIndex];
 
     if (!user) {
-      throw new UserNotFoundException(id);
+      throw new EntityNotFoundException(Entity.USER, id);
     }
 
     if (user.password !== updateUserDto.oldPassword) {
@@ -91,7 +83,7 @@ export class UserService {
     );
 
     if (userIndex === -1) {
-      throw new UserNotFoundException(id);
+      throw new EntityNotFoundException(Entity.USER, id);
     }
 
     this.databaseService.users.splice(userIndex, 1);

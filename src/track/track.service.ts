@@ -1,16 +1,11 @@
 import { v4 as uuid } from 'uuid';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Track } from './entities/track.entity';
 import { UUID } from 'src/database/database.types';
-
-export class TrackNotFoundException extends HttpException {
-  constructor(id) {
-    super(`Track with ID ${id} not found`, HttpStatus.NOT_FOUND);
-  }
-}
+import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 
 @Injectable()
 export class TrackService {
@@ -35,7 +30,7 @@ export class TrackService {
   findOne(id: UUID) {
     const track = this.databaseService.tracks.find((track) => track.id === id);
     if (!track) {
-      throw new TrackNotFoundException(id);
+      throw new EntityNotFoundException(Entity.TRACK, id);
     }
     return track;
   }
@@ -47,7 +42,7 @@ export class TrackService {
     const track = this.databaseService.tracks[trackIndex];
 
     if (!track) {
-      throw new TrackNotFoundException(id);
+      throw new EntityNotFoundException(Entity.TRACK, id);
     }
 
     const updatedTrack: Track = {
@@ -66,7 +61,7 @@ export class TrackService {
     );
 
     if (trackIndex === -1) {
-      throw new TrackNotFoundException(id);
+      throw new EntityNotFoundException(Entity.TRACK, id);
     }
 
     this.databaseService.tracks.splice(trackIndex, 1);

@@ -1,16 +1,11 @@
 import { v4 as uuid } from 'uuid';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Album } from './entities/album.entity';
 import { UUID } from 'src/database/database.types';
-
-export class AlbumNotFoundException extends HttpException {
-  constructor(id) {
-    super(`Album with ID ${id} not found`, HttpStatus.NOT_FOUND);
-  }
-}
+import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 
 @Injectable()
 export class AlbumService {
@@ -34,7 +29,7 @@ export class AlbumService {
   findOne(id: UUID) {
     const album = this.databaseService.albums.find((album) => album.id === id);
     if (!album) {
-      throw new AlbumNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ALBUM, id);
     }
     return album;
   }
@@ -46,7 +41,7 @@ export class AlbumService {
     const album = this.databaseService.albums[albumIndex];
 
     if (!album) {
-      throw new AlbumNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ALBUM, id);
     }
 
     const updatedAlbum: Album = {
@@ -65,7 +60,7 @@ export class AlbumService {
     );
 
     if (albumIndex === -1) {
-      throw new AlbumNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ALBUM, id);
     }
 
     const album = this.databaseService.albums[albumIndex];

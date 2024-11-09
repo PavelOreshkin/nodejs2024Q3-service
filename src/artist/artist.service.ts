@@ -1,16 +1,11 @@
 import { v4 as uuid } from 'uuid';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Artist } from './entities/artist.entity';
 import { UUID } from 'src/database/database.types';
-
-export class ArtistNotFoundException extends HttpException {
-  constructor(id) {
-    super(`Artist with ID ${id} not found`, HttpStatus.NOT_FOUND);
-  }
-}
+import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 
 @Injectable()
 export class ArtistService {
@@ -35,7 +30,7 @@ export class ArtistService {
       (artist) => artist.id === id,
     );
     if (!artist) {
-      throw new ArtistNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ARTIST, id);
     }
     return artist;
   }
@@ -47,7 +42,7 @@ export class ArtistService {
     const artist = this.databaseService.artists[artistIndex];
 
     if (!artist) {
-      throw new ArtistNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ARTIST, id);
     }
 
     const updatedArtist: Artist = {
@@ -66,7 +61,7 @@ export class ArtistService {
     );
 
     if (artistIndex === -1) {
-      throw new ArtistNotFoundException(id);
+      throw new EntityNotFoundException(Entity.ARTIST, id);
     }
 
     const artist = this.databaseService.artists[artistIndex];
