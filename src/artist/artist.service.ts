@@ -69,7 +69,19 @@ export class ArtistService {
       throw new ArtistNotFoundException(id);
     }
 
+    const artist = this.databaseService.artists[artistIndex];
+
+    const updatedTracks = this.databaseService.tracks.map((track) =>
+      track.artistId === artist.id ? { ...track, artistId: null } : track,
+    );
+
+    const updatedAlbums = this.databaseService.albums.map((album) =>
+      album.artistId === artist.id ? { ...album, artistId: null } : album,
+    );
+
     this.databaseService.artists.splice(artistIndex, 1);
+    this.databaseService.tracks = updatedTracks;
+    this.databaseService.albums = updatedAlbums;
     return;
   }
 }
