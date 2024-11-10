@@ -1,92 +1,63 @@
-import { v4 as uuid } from 'uuid';
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  Logger,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { DatabaseService } from 'src/database/database.service';
-import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { instanceToPlain } from 'class-transformer';
 import { UUID } from 'src/database/database.types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly databaseService: DatabaseService) {}
-  private readonly logger = new Logger(); // TODO удалить
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user = new User({
-      id: uuid(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: new Date().valueOf(),
-      updatedAt: new Date().valueOf(),
-    });
-    this.databaseService.users.push(user);
-    const { password: _password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  async create(createUserDto: CreateUserDto) {
+    const newUser = this.userRepository.create(createUserDto);
+    const savedUser = await this.userRepository.save(newUser);
+    return instanceToPlain(savedUser);
   }
 
-  findAll() {
-    return this.databaseService.users.map((user) => {
-      const { password: _password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    });
+  async findAll() {
+    return await instanceToPlain(this.userRepository.find());
   }
 
-  findOne(id: UUID) {
-    const user = this.databaseService.users.find((user) => user.id === id);
-    if (!user) {
-      throw new EntityNotFoundException(Entity.USER, id);
-    }
-    const { password: _password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  async findOne(id: UUID) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new EntityNotFoundException(Entity.USER, id);
+    return instanceToPlain(user);
   }
 
-  update(id: UUID, updateUserDto: UpdateUserDto) {
-    const userIndex = this.databaseService.users.findIndex(
-      (user) => user.id === id,
-    );
-    const user = this.databaseService.users[userIndex];
+  async update(id: UUID, updateUserDto: UpdateUserDto) {
+    const { oldPassword, newPassword } = updateUserDto;
+    const user = await this.userRepository.findOne({ where: { id } });
 
-    if (!user) {
-      throw new EntityNotFoundException(Entity.USER, id);
-    }
+    if (!user) throw new EntityNotFoundException(Entity.USER, id);
 
-    if (user.password !== updateUserDto.oldPassword) {
+    if (user.password !== oldPassword) {
       throw new ForbiddenException('Wrong old password');
     }
 
-    if (updateUserDto.oldPassword === updateUserDto.newPassword) {
+    if (oldPassword === newPassword) {
       throw new BadRequestException('Passwords should not be the same');
     }
 
-    const updatedUser: User = {
-      ...user,
-      version: user.version + 1,
-      updatedAt: new Date().valueOf(),
-      password: updateUserDto.newPassword,
-    };
+    Object.assign(user, { password: newPassword });
 
-    this.databaseService.users.splice(userIndex, 1, updatedUser);
-    const { password: _password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+    const updatedUser = await this.userRepository.save(user);
+    return instanceToPlain(updatedUser);
   }
 
-  remove(id: UUID) {
-    const userIndex = this.databaseService.users.findIndex(
-      (user) => user.id === id,
-    );
-
-    if (userIndex === -1) {
-      throw new EntityNotFoundException(Entity.USER, id);
-    }
-
-    this.databaseService.users.splice(userIndex, 1);
+  async remove(id: UUID) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new EntityNotFoundException(Entity.USER, id);
+    await this.userRepository.remove(user);
     return;
   }
 }
