@@ -24,8 +24,8 @@ export class UserService {
     return instanceToPlain(savedUser);
   }
 
-  async findAll() {
-    return await instanceToPlain(this.userRepository.find());
+  findAll() {
+    return instanceToPlain(this.userRepository.find());
   }
 
   async findOne(id: UUID) {
@@ -39,11 +39,9 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) throw new EntityNotFoundException(Entity.USER, id);
-
     if (user.password !== oldPassword) {
       throw new ForbiddenException('Wrong old password');
     }
-
     if (oldPassword === newPassword) {
       throw new BadRequestException('Passwords should not be the same');
     }
