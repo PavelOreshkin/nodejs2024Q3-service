@@ -1,5 +1,5 @@
 import { Album } from 'src/album/entities/album.entity';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Track } from 'src/track/entities/track.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 

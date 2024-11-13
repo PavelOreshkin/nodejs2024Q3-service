@@ -5,11 +5,11 @@ import { ArtistModule } from './artist/artist.module';
 import { AlbumModule } from './album/album.module';
 import { TrackModule } from './track/track.module';
 import { FavoriteModule } from './favorite/favorite.module';
-import { DatabaseModule } from './database/database.module';
 import { User } from './user/entities/user.entity';
 import { Artist } from './artist/entities/artist.entity';
 import { Album } from './album/entities/album.entity';
 import { Track } from './track/entities/track.entity';
+import { Favorite } from './favorite/entities/favorite.entity';
 
 @Module({
   imports: [
@@ -18,7 +18,6 @@ import { Track } from './track/entities/track.entity';
     AlbumModule,
     TrackModule,
     FavoriteModule,
-    DatabaseModule,
     // TODO move TypeOrmModule to global config
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -26,9 +25,10 @@ import { Track } from './track/entities/track.entity';
       port: 5432,
       password: 'qwe',
       username: 'postgres',
-      entities: [User, Artist, Album, Track],
+      entities: [User, Artist, Album, Track, Favorite],
+      // migrations: ['./src/migrations/*.ts'],
       database: 'postgres',
-      synchronize: true,
+      synchronize: true, // TODO переключить на false
       logging: true,
     }),
   ],

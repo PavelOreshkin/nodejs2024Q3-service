@@ -1,4 +1,4 @@
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Exclude } from 'class-transformer';
 import {
   BeforeInsert,

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';

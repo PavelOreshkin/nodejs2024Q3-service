@@ -1,5 +1,5 @@
 import { Artist } from 'src/artist/entities/artist.entity';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Track } from 'src/track/entities/track.entity';
 import {
   Column,

@@ -1,46 +1,54 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { DatabaseService } from 'src/database/database.service';
-import { UUID } from 'src/database/database.types';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UUID } from 'src/utils/types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
+import { Favorite } from './entities/favorite.entity';
+import { In, Repository } from 'typeorm';
+import { Track } from 'src/track/entities/track.entity';
+import { Artist } from 'src/artist/entities/artist.entity';
+import { Album } from 'src/album/entities/album.entity';
 
 @Injectable()
 export class FavoriteService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    @InjectRepository(Favorite)
+    private readonly favoriteRepository: Repository<Favorite>,
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+  ) {}
 
-  findAll() {
-    const {
-      artists: artistsFromDb,
-      albums: albumsFromDb,
-      tracks: tracksFromDb,
-    } = this.databaseService;
-    const {
-      artists: artistIds,
-      albums: albumIds,
-      tracks: trackIds,
-    } = this.databaseService.favorite;
+  async findAll() {
+    // this.favoriteRepository.save({ artists: [], albums: [], tracks: [] });
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
 
-    const artists = artistIds
-      .map(
-        (artistId) =>
-          artistsFromDb.find((artist) => artist.id === artistId) || null,
-      )
-      .filter((item) => item);
-    const albums = albumIds
-      .map(
-        (albumId) => albumsFromDb.find((album) => album.id === albumId) || null,
-      )
-      .filter((item) => item);
-    const tracks = trackIds
-      .map(
-        (trackId) => tracksFromDb.find((track) => track.id === trackId) || null,
-      )
-      .filter((item) => item);
+    const artists = await this.artistRepository.findBy({
+      id: In(favorite.artists),
+    });
 
-    return { artists, albums, tracks };
+    const albums = await this.albumRepository.findBy({
+      id: In(favorite.albums),
+    });
+
+    const tracks = await this.trackRepository.findBy({
+      id: In(favorite.tracks),
+    });
+
+    return {
+      artists,
+      albums,
+      tracks,
+    };
   }
 
-  addTrack(id: UUID) {
-    const track = this.databaseService.tracks.find((track) => track.id === id);
+  async addTrack(id: UUID) {
+    const track = await this.trackRepository.findOne({ where: { id } });
+
     if (!track) {
       throw new EntityNotFoundException(
         Entity.TRACK,
@@ -48,11 +56,17 @@ export class FavoriteService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    this.databaseService.favorite.tracks.push(id);
+
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+    favorite.tracks.push(track.id);
+
+    await this.favoriteRepository.save(favorite);
   }
 
-  addAlbum(id: UUID) {
-    const album = this.databaseService.albums.find((album) => album.id === id);
+  async addAlbum(id: UUID) {
+    const album = await this.albumRepository.findOne({ where: { id } });
     if (!album) {
       throw new EntityNotFoundException(
         Entity.ALBUM,
@@ -60,13 +74,18 @@ export class FavoriteService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    this.databaseService.favorite.albums.push(id);
+
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+    favorite.albums.push(album.id);
+
+    await this.favoriteRepository.save(favorite);
   }
 
-  addArtist(id: UUID) {
-    const artist = this.databaseService.artists.find(
-      (artist) => artist.id === id,
-    );
+  async addArtist(id: UUID) {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+
     if (!artist) {
       throw new EntityNotFoundException(
         Entity.ARTIST,
@@ -74,37 +93,57 @@ export class FavoriteService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    this.databaseService.favorite.artists.push(id);
+
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+    favorite.artists.push(artist.id);
+
+    await this.favoriteRepository.save(favorite);
   }
 
-  removeTrack(id: UUID) {
-    const trackIndex = this.databaseService.favorite.tracks.findIndex(
-      (trackId) => trackId === id,
-    );
+  async removeTrack(id: UUID) {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+
+    const trackIndex = favorite.tracks.findIndex((trackId) => trackId === id);
 
     if (trackIndex === -1) {
       throw new EntityNotFoundException(Entity.TRACK, id);
     }
 
-    this.databaseService.favorite.tracks.splice(trackIndex, 1);
+    favorite.tracks.splice(trackIndex, 1);
+
+    await this.favoriteRepository.save(favorite);
+
     return;
   }
 
-  removeAlbum(id: UUID) {
-    const albumIndex = this.databaseService.favorite.albums.findIndex(
-      (albumId) => albumId === id,
-    );
+  async removeAlbum(id: UUID) {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+
+    const albumIndex = favorite.albums.findIndex((albumId) => albumId === id);
 
     if (albumIndex === -1) {
       throw new EntityNotFoundException(Entity.ALBUM, id);
     }
 
-    this.databaseService.favorite.albums.splice(albumIndex, 1);
+    favorite.albums.splice(albumIndex, 1);
+
+    await this.favoriteRepository.save(favorite);
+
     return;
   }
 
-  removeArtist(id: UUID) {
-    const artistIndex = this.databaseService.favorite.artists.findIndex(
+  async removeArtist(id: UUID) {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { id: 'favorite-singleton-id' },
+    });
+
+    const artistIndex = favorite.artists.findIndex(
       (artistId) => artistId === id,
     );
 
@@ -112,7 +151,10 @@ export class FavoriteService {
       throw new EntityNotFoundException(Entity.ARTIST, id);
     }
 
-    this.databaseService.favorite.artists.splice(artistIndex, 1);
+    favorite.artists.splice(artistIndex, 1);
+
+    await this.favoriteRepository.save(favorite);
+
     return;
   }
 }

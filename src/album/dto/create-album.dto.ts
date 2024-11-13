@@ -1,5 +1,5 @@
 import { IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 
 export class CreateAlbumDto {
   @IsString()
