@@ -1,30 +1,19 @@
 import { Exclude } from 'class-transformer';
-import { IsArray, IsUUID } from 'class-validator';
-import { Album } from 'src/album/entities/album.entity';
 import { UUID } from 'src/utils/types';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Favorite {
   @Exclude()
   @PrimaryColumn({ default: 'favorite-singleton-id' })
   id: string;
-  // @Column()
-  // @IsArray()
-  // @IsUUID()
-  @Column('uuid', { array: true })
+
+  @Column('uuid', { array: true, default: [] })
   artists: UUID[];
 
-  // @Column()
-  // @IsArray()
-  // @IsUUID()
-
-  @Column('uuid', { array: true })
+  @Column('uuid', { array: true, default: [] })
   albums: UUID[];
 
-  // @Column()
-  // @IsArray()
-  // @IsUUID()
-  @Column('uuid', { array: true })
+  @Column('uuid', { array: true, default: [] })
   tracks: UUID[];
 }

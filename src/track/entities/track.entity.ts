@@ -15,10 +15,10 @@ export class Track {
   duration: number;
 
   @Column({ nullable: true })
-  artistId: UUID | null; // refers to Artist
+  artistId: UUID | null;
 
   @Column({ nullable: true })
-  albumId: UUID | null; // refers to Album
+  albumId: UUID | null;
 
   @ManyToOne(() => Artist, (artist) => artist.tracks, {
     nullable: true,
