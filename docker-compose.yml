@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     build:
@@ -19,6 +17,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
     image: paveloreshkin/rsschool-home-library:latest
     ports:
       - "${PORT}:${PORT}"
