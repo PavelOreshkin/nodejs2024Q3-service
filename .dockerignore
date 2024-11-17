@@ -6,4 +6,3 @@ docker-compose.yml
 .vscode
 *.log
 coverage
-test
