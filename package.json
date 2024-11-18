@@ -26,7 +26,6 @@
     "migration:run": "npm run typeorm migration:run -- -d ./dist/data-source.js",
     "migration:revert": "npm run typeorm migration:revert -- -d ./dist/data-source.js",
     "docker:build": "docker-compose up --build",
-    "docker:buildw": "docker-compose up --build --watch",
     "docker:watch": "docker-compose watch",
     "docker:test": "docker-compose exec app npm run test",
     "docker:lint": "docker-compose exec app npm run lint",
