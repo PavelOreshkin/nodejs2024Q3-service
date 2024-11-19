@@ -1,82 +1,48 @@
-import { v4 as uuid } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { DatabaseService } from 'src/database/database.service';
 import { Artist } from './entities/artist.entity';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+  ) {}
 
-  create(createArtistDto: CreateArtistDto) {
-    const artist = new Artist({
-      id: uuid(),
-      name: createArtistDto.name,
-      grammy: createArtistDto.grammy,
-    });
-    this.databaseService.artists.push(artist);
-    return artist;
+  async create(createArtistDto: CreateArtistDto) {
+    const newArtist = this.artistRepository.create(createArtistDto);
+    return await this.artistRepository.save(newArtist);
   }
 
   findAll() {
-    return this.databaseService.artists;
+    return this.artistRepository.find();
   }
 
-  findOne(id: UUID) {
-    const artist = this.databaseService.artists.find(
-      (artist) => artist.id === id,
-    );
-    if (!artist) {
-      throw new EntityNotFoundException(Entity.ARTIST, id);
-    }
+  async findOne(id: UUID) {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+    if (!artist) throw new EntityNotFoundException(Entity.ARTIST, id);
     return artist;
   }
 
-  update(id: UUID, updateArtistDto: UpdateArtistDto) {
-    const artistIndex = this.databaseService.artists.findIndex(
-      (artist) => artist.id === id,
-    );
-    const artist = this.databaseService.artists[artistIndex];
-
-    if (!artist) {
-      throw new EntityNotFoundException(Entity.ARTIST, id);
-    }
-
-    const updatedArtist: Artist = {
-      ...artist,
-      ...updateArtistDto,
-    };
-
-    this.databaseService.artists.splice(artistIndex, 1, updatedArtist);
-
-    return updatedArtist;
+  async update(id: UUID, updateArtistDto: UpdateArtistDto) {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+    if (!artist) throw new EntityNotFoundException(Entity.ARTIST, id);
+    Object.assign(artist, updateArtistDto);
+    return this.artistRepository.save(artist);
   }
 
-  remove(id: UUID) {
-    const artistIndex = this.databaseService.artists.findIndex(
-      (artist) => artist.id === id,
-    );
-
-    if (artistIndex === -1) {
-      throw new EntityNotFoundException(Entity.ARTIST, id);
-    }
-
-    const artist = this.databaseService.artists[artistIndex];
-
-    const updatedTracks = this.databaseService.tracks.map((track) =>
-      track.artistId === artist.id ? { ...track, artistId: null } : track,
-    );
-
-    const updatedAlbums = this.databaseService.albums.map((album) =>
-      album.artistId === artist.id ? { ...album, artistId: null } : album,
-    );
-
-    this.databaseService.artists.splice(artistIndex, 1);
-    this.databaseService.tracks = updatedTracks;
-    this.databaseService.albums = updatedAlbums;
+  async remove(id: UUID) {
+    const artist = await this.artistRepository.findOne({
+      where: { id },
+      relations: ['tracks'],
+    });
+    if (!artist) throw new EntityNotFoundException(Entity.ARTIST, id);
+    await this.artistRepository.remove(artist);
     return;
   }
 }

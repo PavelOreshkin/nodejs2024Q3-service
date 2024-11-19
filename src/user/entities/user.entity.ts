@@ -1,33 +1,56 @@
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
+import { Exclude } from 'class-transformer';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  VersionColumn,
+} from 'typeorm';
 
+@Entity()
 export class User {
-  id: UUID; // uuid v4
-  login: string;
-  password: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
+  @PrimaryGeneratedColumn('uuid')
+  id: UUID;
 
-  constructor({
-    id,
-    login,
-    password,
-    version,
-    createdAt,
-    updatedAt,
-  }: {
-    id: UUID;
-    login: string;
-    password: string;
-    version: number;
-    createdAt: number;
-    updatedAt: number;
-  }) {
-    this.id = id;
-    this.login = login;
-    this.password = password;
-    this.version = version;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+  @Column()
+  login: string;
+
+  @Column()
+  @Exclude()
+  password: string;
+
+  @VersionColumn()
+  version: number;
+
+  @Column({
+    type: 'bigint',
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseInt(value, 10),
+    },
+  })
+  createdAt: number;
+
+  @Column({
+    type: 'bigint',
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseInt(value, 10),
+    },
+  })
+  updatedAt: number;
+
+  @BeforeInsert()
+  setCreationDate() {
+    const timestamp = Date.now();
+    this.createdAt = timestamp;
+    this.updatedAt = timestamp;
+  }
+
+  @BeforeUpdate()
+  setUpdateDate() {
+    this.updatedAt = Date.now();
   }
 }

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 
 export enum Entity {
   USER = 'User',

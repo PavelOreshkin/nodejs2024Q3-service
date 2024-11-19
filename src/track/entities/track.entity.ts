@@ -1,29 +1,34 @@
-import { UUID } from 'src/database/database.types';
+import { Album } from 'src/album/entities/album.entity';
+import { Artist } from 'src/artist/entities/artist.entity';
+import { UUID } from 'src/utils/types';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity()
 export class Track {
-  id: UUID; // uuid v4
-  name: string;
-  artistId: UUID | null; // refers to Artist
-  albumId: UUID | null; // refers to Album
-  duration: number; // integer number
+  @PrimaryGeneratedColumn('uuid')
+  id: UUID;
 
-  constructor({
-    id,
-    name,
-    artistId,
-    albumId,
-    duration,
-  }: {
-    id: UUID;
-    name: string;
-    artistId: UUID | null;
-    albumId: UUID | null;
-    duration: number;
-  }) {
-    this.id = id;
-    this.name = name;
-    this.artistId = artistId;
-    this.albumId = albumId;
-    this.duration = duration;
-  }
+  @Column()
+  name: string;
+
+  @Column()
+  duration: number;
+
+  @Column({ nullable: true })
+  artistId: UUID | null;
+
+  @Column({ nullable: true })
+  albumId: UUID | null;
+
+  @ManyToOne(() => Artist, (artist) => artist.tracks, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  artist: Artist | null;
+
+  @ManyToOne(() => Album, (album) => album.tracks, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  album: Album | null;
 }

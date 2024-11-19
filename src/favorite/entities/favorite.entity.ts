@@ -1,21 +1,19 @@
-import { UUID } from 'src/database/database.types';
+import { Exclude } from 'class-transformer';
+import { UUID } from 'src/utils/types';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
+@Entity()
 export class Favorite {
-  artists: UUID[];
-  albums: UUID[];
-  tracks: UUID[];
+  @Exclude()
+  @PrimaryColumn({ default: 'favorite-singleton-id' })
+  id: string;
 
-  constructor({
-    artists,
-    albums,
-    tracks,
-  }: {
-    artists: UUID[];
-    albums: UUID[];
-    tracks: UUID[];
-  }) {
-    this.artists = artists;
-    this.albums = albums;
-    this.tracks = tracks;
-  }
+  @Column('uuid', { array: true, default: [] })
+  artists: UUID[];
+
+  @Column('uuid', { array: true, default: [] })
+  albums: UUID[];
+
+  @Column('uuid', { array: true, default: [] })
+  tracks: UUID[];
 }

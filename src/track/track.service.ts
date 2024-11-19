@@ -1,70 +1,45 @@
-import { v4 as uuid } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { DatabaseService } from 'src/database/database.service';
 import { Track } from './entities/track.entity';
-import { UUID } from 'src/database/database.types';
+import { UUID } from 'src/utils/types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+  ) {}
 
-  create(createTrackDto: CreateTrackDto) {
-    const track = new Track({
-      id: uuid(),
-      name: createTrackDto.name,
-      duration: createTrackDto.duration,
-      albumId: createTrackDto.albumId,
-      artistId: createTrackDto.artistId,
-    });
-    this.databaseService.tracks.push(track);
-    return track;
+  async create(createTrackDto: CreateTrackDto) {
+    const newTrack = this.trackRepository.create(createTrackDto);
+    return await this.trackRepository.save(newTrack);
   }
 
   findAll() {
-    return this.databaseService.tracks;
+    return this.trackRepository.find();
   }
 
-  findOne(id: UUID) {
-    const track = this.databaseService.tracks.find((track) => track.id === id);
-    if (!track) {
-      throw new EntityNotFoundException(Entity.TRACK, id);
-    }
+  async findOne(id: UUID) {
+    const track = await this.trackRepository.findOne({ where: { id } });
+    if (!track) throw new EntityNotFoundException(Entity.TRACK, id);
     return track;
   }
 
-  update(id: UUID, updateTrackDto: UpdateTrackDto) {
-    const trackIndex = this.databaseService.tracks.findIndex(
-      (track) => track.id === id,
-    );
-    const track = this.databaseService.tracks[trackIndex];
-
-    if (!track) {
-      throw new EntityNotFoundException(Entity.TRACK, id);
-    }
-
-    const updatedTrack: Track = {
-      ...track,
-      ...updateTrackDto,
-    };
-
-    this.databaseService.tracks.splice(trackIndex, 1, updatedTrack);
-
-    return updatedTrack;
+  async update(id: UUID, updateTrackDto: UpdateTrackDto) {
+    const track = await this.trackRepository.findOne({ where: { id } });
+    if (!track) throw new EntityNotFoundException(Entity.TRACK, id);
+    Object.assign(track, updateTrackDto);
+    return this.trackRepository.save(track);
   }
 
-  remove(id: UUID) {
-    const trackIndex = this.databaseService.tracks.findIndex(
-      (track) => track.id === id,
-    );
-
-    if (trackIndex === -1) {
-      throw new EntityNotFoundException(Entity.TRACK, id);
-    }
-
-    this.databaseService.tracks.splice(trackIndex, 1);
+  async remove(id: UUID) {
+    const track = await this.trackRepository.findOne({ where: { id } });
+    if (!track) throw new EntityNotFoundException(Entity.TRACK, id);
+    await this.trackRepository.remove(track);
     return;
   }
 }

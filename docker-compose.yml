@@ -1,0 +1,52 @@
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    image: paveloreshkin/rsschool-home-library-postgre:latest
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pglogs:/var/log/postgresql
+    restart: always
+    networks:
+      - home-library-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+    image: paveloreshkin/rsschool-home-library:latest
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      NODE_ENV: development
+      PORT: ${PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - home-library-network
+
+networks:
+  home-library-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  pglogs:

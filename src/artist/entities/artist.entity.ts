@@ -1,21 +1,22 @@
-import { UUID } from 'src/database/database.types';
+import { Album } from 'src/album/entities/album.entity';
+import { UUID } from 'src/utils/types';
+import { Track } from 'src/track/entities/track.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity()
 export class Artist {
-  id: UUID; // uuid v4
+  @PrimaryGeneratedColumn('uuid')
+  id: UUID;
+
+  @Column()
   name: string;
+
+  @Column()
   grammy: boolean;
 
-  constructor({
-    id,
-    name,
-    grammy,
-  }: {
-    id: UUID;
-    name: string;
-    grammy: boolean;
-  }) {
-    this.id = id;
-    this.name = name;
-    this.grammy = grammy;
-  }
+  @OneToMany(() => Album, (album) => album.artist)
+  albums: Album[];
+
+  @OneToMany(() => Track, (track) => track.artist)
+  tracks: Track[];
 }
