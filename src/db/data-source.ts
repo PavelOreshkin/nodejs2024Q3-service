@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
-import { User } from './user/entities/user.entity';
-import { Artist } from './artist/entities/artist.entity';
-import { Album } from './album/entities/album.entity';
-import { Track } from './track/entities/track.entity';
-import { Favorite } from './favorite/entities/favorite.entity';
+import { User } from '../api/user/entities/user.entity';
+import { Artist } from '../api/artist/entities/artist.entity';
+import { Album } from '../api/album/entities/album.entity';
+import { Track } from '../api/track/entities/track.entity';
+import { Favorite } from '../api/favorite/entities/favorite.entity';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -28,3 +28,9 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: true,
 });
+
+export const initDatabase = async () => {
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize();
+  }
+};

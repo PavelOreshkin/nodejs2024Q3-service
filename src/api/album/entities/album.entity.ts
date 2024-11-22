@@ -1,6 +1,6 @@
-import { Artist } from 'src/artist/entities/artist.entity';
+import { Artist } from 'src/api/artist/entities/artist.entity';
 import { UUID } from 'src/utils/types';
-import { Track } from 'src/track/entities/track.entity';
+import { Track } from 'src/api/track/entities/track.entity';
 import {
   Column,
   Entity,

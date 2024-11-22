@@ -4,9 +4,9 @@ import { UUID } from 'src/utils/types';
 import { Entity, EntityNotFoundException } from 'src/utils/customExceptions';
 import { Favorite } from './entities/favorite.entity';
 import { In, Repository } from 'typeorm';
-import { Track } from 'src/track/entities/track.entity';
-import { Artist } from 'src/artist/entities/artist.entity';
-import { Album } from 'src/album/entities/album.entity';
+import { Track } from 'src/api/track/entities/track.entity';
+import { Artist } from 'src/api/artist/entities/artist.entity';
+import { Album } from 'src/api/album/entities/album.entity';
 
 @Injectable()
 export class FavoriteService {

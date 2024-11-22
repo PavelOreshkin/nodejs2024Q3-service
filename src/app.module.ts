@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
-import { ArtistModule } from './artist/artist.module';
-import { AlbumModule } from './album/album.module';
-import { TrackModule } from './track/track.module';
-import { FavoriteModule } from './favorite/favorite.module';
-import { AppDataSource } from './data-source';
+import { UserModule } from './api/user/user.module';
+import { ArtistModule } from './api/artist/artist.module';
+import { AlbumModule } from './api/album/album.module';
+import { TrackModule } from './api/track/track.module';
+import { FavoriteModule } from './api/favorite/favorite.module';
+import { AppDataSource } from './db/data-source';
+import { CustomLogger } from './logger/CustomLogger';
+import { LoggingMiddleware } from './logger/LoggingMiddleware';
 
 @Module({
   imports: [
@@ -19,6 +21,10 @@ import { AppDataSource } from './data-source';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [CustomLogger],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}

@@ -1,5 +1,5 @@
-import { Album } from 'src/album/entities/album.entity';
-import { Artist } from 'src/artist/entities/artist.entity';
+import { Album } from 'src/api/album/entities/album.entity';
+import { Artist } from 'src/api/artist/entities/artist.entity';
 import { UUID } from 'src/utils/types';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
