@@ -11,8 +11,7 @@ export class LoggingMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     res.on('finish', () => {
-      const { statusCode, statusMessage } = res;
-      // console.log('res: ', res);
+      const { statusCode } = res;
       const duration = Date.now() - startTime;
       this.logger.log(
         `Request: ${method} ${url} - Query: ${JSON.stringify(

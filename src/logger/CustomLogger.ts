@@ -6,22 +6,15 @@ dotenv.config();
 
 @Injectable()
 export class CustomLogger implements LoggerService {
-  private logLevel = process.env.LOG_LEVEL || 'info';
+  private logLevel = Number(process.env.LOG_LEVEL) || 0;
   private logFile = path.join(__dirname, '..', '..', 'logs', 'application.log');
   private errorFile = path.join(__dirname, '..', '..', 'logs', 'errors.log');
   private maxFileSize =
     parseInt(process.env.LOG_FILE_MAX_SIZE_KB || '1024', 10) * 1024;
 
   constructor() {
-    this.checkLogRotation(this.logLevel);
-    this.checkLogRotation(this.errorFile);
-  }
-  log(message: any, ...optionalParams: any[]) {
-    this.writeLog('INFO', this.logFile, message, optionalParams);
-  }
-
-  warn(message: any, ...optionalParams: any[]) {
-    this.writeLog('WARN', this.logFile, message, optionalParams);
+    this.checkLogRotation('application.log');
+    this.checkLogRotation('errors.log');
   }
 
   error(message: any, trace?: string, ...optionalParams: any[]) {
@@ -29,16 +22,24 @@ export class CustomLogger implements LoggerService {
     this.writeLog('ERROR', this.errorFile, errorMessage, optionalParams);
   }
 
-  debug?(message: any, ...optionalParams: any[]) {
-    if (this.logLevel === 'debug') {
-      this.writeLog('DEBUG', this.logFile, message, optionalParams);
-    }
+  warn(message: any, ...optionalParams: any[]) {
+    if (this.logLevel < 1) return;
+    this.writeLog('WARN', this.logFile, message, optionalParams);
   }
 
-  verbose?(message: any, ...optionalParams: any[]) {
-    if (['debug', 'verbose'].includes(this.logLevel)) {
-      this.writeLog('VERBOSE', this.logFile, message, optionalParams);
-    }
+  log(message: any, ...optionalParams: any[]) {
+    if (this.logLevel < 2) return;
+    this.writeLog('INFO', this.logFile, message, optionalParams);
+  }
+
+  debug(message: any, ...optionalParams: any[]) {
+    if (this.logLevel < 3) return;
+    this.writeLog('DEBUG', this.logFile, message, optionalParams);
+  }
+
+  verbose(message: any, ...optionalParams: any[]) {
+    if (this.logLevel < 4) return;
+    this.writeLog('VERBOSE', this.logFile, message, optionalParams);
   }
 
   private writeLog(
