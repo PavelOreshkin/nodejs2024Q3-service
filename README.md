@@ -151,3 +151,9 @@ npm run docker:test:refresh
 ```
 npm run docker:lint
 ```
+
+### Logging
+
+You can find logs in logs volumes:
+`application.log` - all logs without errors
+`errors.log` - only errors
