@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { compareSync } from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -34,7 +35,8 @@ export class AuthService {
     if (!user) {
       throw new ForbiddenException('No user with such login');
     }
-    if (user?.password !== password) {
+    const isSamePassword = await compareSync(password, user.password);
+    if (!isSamePassword) {
       throw new ForbiddenException("Password doesn't match actual one");
     }
     const payload = { userId: user.id, login: user.login };

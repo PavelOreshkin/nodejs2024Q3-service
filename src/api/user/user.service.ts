@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { hashSync, compareSync } from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
@@ -19,7 +20,11 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const newUser = this.userRepository.create(createUserDto);
+    const hashedPassword = hashSync(createUserDto.password, 8);
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     const savedUser = await this.userRepository.save(newUser);
     return instanceToPlain(savedUser);
   }
@@ -39,14 +44,18 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) throw new EntityNotFoundException(Entity.USER, id);
-    if (user.password !== oldPassword) {
+
+    const isSamePassword = compareSync(oldPassword, user.password);
+    if (!isSamePassword) {
       throw new ForbiddenException('Wrong old password');
     }
     if (oldPassword === newPassword) {
       throw new BadRequestException('Passwords should not be the same');
     }
 
-    Object.assign(user, { password: newPassword });
+    const hashedPassword = hashSync(newPassword, 8);
+
+    Object.assign(user, { password: hashedPassword });
 
     const updatedUser = await this.userRepository.save(user);
     return instanceToPlain(updatedUser);
