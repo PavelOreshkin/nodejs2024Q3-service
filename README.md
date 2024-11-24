@@ -65,23 +65,17 @@ npm run docker:pull
 
 ### Run containers
 
-you can use two different modes
-without watch:
-
-```
-npm run docker:build
-```
-
-with watch:
+With watch mode:
 
 ```
 npm run docker:watch
 ```
 
-> [!NOTE]  
-> If you close terminal process can continue work, and second call "npm run docker:watch" will lead to error:
-> `cannot take exclusive lock for project "nodejs2024q3-service": process with PID 36456 is still running`
-> I didn't have enough time to figure out how to fix it other than rebooting the PC =(
+without:
+
+```
+npm run docker:up
+```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
@@ -108,3 +102,52 @@ In my case 470mb
 
 > [!IMPORTANT]  
 > If I forget something and you have problem with start docker please text me in discord @pashk6802
+
+# Home Library Service: Part 3
+
+### Checkout branch
+
+choose to branch `part_3_auth_logging`
+
+### ENV
+
+create `.env` file from `.env.example`
+
+### Pull images (not required)
+
+```
+npm run docker:pull
+```
+
+### Run containers
+
+With watch mode:
+
+```
+npm run docker:watch
+```
+
+without:
+
+```
+npm run docker:up
+```
+
+After starting the app on port (4000 as default) you can open
+in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+
+### Testing app inside container
+
+```
+npm run docker:test:auth
+```
+
+```
+npm run docker:test:refresh
+```
+
+### Check lint errors inside container
+
+```
+npm run docker:lint
+```
