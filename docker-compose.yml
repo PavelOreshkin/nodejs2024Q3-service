@@ -6,6 +6,8 @@ services:
     image: paveloreshkin/rsschool-home-library-postgre:latest
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
       - pglogs:/var/log/postgresql

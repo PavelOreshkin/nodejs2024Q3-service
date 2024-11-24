@@ -4,8 +4,6 @@ import { Artist } from '../api/artist/entities/artist.entity';
 import { Album } from '../api/album/entities/album.entity';
 import { Track } from '../api/track/entities/track.entity';
 import { Favorite } from '../api/favorite/entities/favorite.entity';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const {
   POSTGRES_HOST,

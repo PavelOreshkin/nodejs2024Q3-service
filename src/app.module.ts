@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './api/auth/auth.module';
 import { UserModule } from './api/user/user.module';
 import { ArtistModule } from './api/artist/artist.module';
 import { AlbumModule } from './api/album/album.module';
@@ -11,6 +12,7 @@ import { LoggingMiddleware } from './logger/LoggingMiddleware';
 
 @Module({
   imports: [
+    AuthModule,
     UserModule,
     ArtistModule,
     AlbumModule,

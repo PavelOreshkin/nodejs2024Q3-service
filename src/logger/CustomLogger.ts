@@ -1,8 +1,6 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 @Injectable()
 export class CustomLogger implements LoggerService {

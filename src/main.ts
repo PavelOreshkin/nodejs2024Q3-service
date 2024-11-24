@@ -6,7 +6,6 @@ import { initDatabase } from './db/data-source';
 import { catchUncaughtErrors } from './utils/catchUncaughtErrors';
 import { runSwaggerDoc } from './utils/swaggerDoc';
 import { initLogger } from './logger/initLogger';
-
 import * as dotenv from 'dotenv';
 dotenv.config();
 
